@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import sklearn
+import os.path
 
 samples = []
 
@@ -10,15 +11,39 @@ samples = []
 with open('.\data\driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
     for line in reader:
+#        if line[3] != '0':
         samples.append(line)
         
 print('Number of records in input file = ', len(samples))
 print('File read complete')
 
-###  Augument Data
+
+
 """
+###  Visualize Data
+
+steering_angles = []
+for sample in samples:
+    steering_angle = float(sample[3])
+    steering_angles.append(steering_angle)
+print(len(steering_angles))
+print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+print('VISUALIZING TRAINING CLASS DISTRIBUTION')
+print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+n, bins, patches = plt.hist(steering_angles, bins=21)
+plt.title("Streeing Anlge Histogram")
+plt.xlabel("Streering Angle")
+plt.ylabel("Frequency")
+plt.axis([-1, 1, 0, 10000])
+plt.grid(True)
+plt.show()
+
+
+
+###  Augument Data
+
 augumented_images, augumented_measurements = [], []
-for image, measurement in zip(images, measurements):
+for sample in samples:
     augumented_images.append(image)
     augumented_measurements.append(measurement)
     augumented_images.append(cv2.flip(image,1))
@@ -29,6 +54,9 @@ Ay_train = np.array(augumented_measurements)
 
 print('Number of records after augumentation = ', len(samples))
 print('Data augumentation complete')
+
+###  Preprocess Data
+
 """
 
 from sklearn.model_selection import train_test_split
@@ -58,6 +86,9 @@ def generator(samples, batch_size=32):
                 images.append(image)
                 measurement = float(batch_sample[3])
                 measurements.append(measurement)
+                
+                images.append(cv2.flip(image,1))
+                measurements.append(measurement * -1.0)
 
             X_train = np.array(images)
             y_train = np.array(measurements)
@@ -98,7 +129,8 @@ model.add(Dense(84))
 model.add(Dense(1))
 
 """
-Nvidia model
+
+# Nvidia model
 model = Sequential()
 model.add(Cropping2D(cropping=((60,25), (0,0)), input_shape=(160,320,3)))
 model.add(Lambda(lambda x: x/255.0 - 0.5))
@@ -115,17 +147,19 @@ model.add(Dense(50))
 model.add(Dense(10))
 model.add(Dense(1))
 
+### Load weights if available
+if os.path.exists('my_model_weights.h5'):
+    model.load_weights('my_model_weights.h5')
+
 model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
-history_object = model.fit_generator(train_generator, steps_per_epoch= 10, validation_data=validation_generator, 
-            validation_steps=10, epochs=5, verbose=1)
+history_object = model.fit_generator(train_generator, steps_per_epoch= (len(train_samples)/32), validation_data=validation_generator, 
+            validation_steps=(len(validation_samples)/32), epochs=3, verbose=1)
 
 ### Save the model
 model.save('model.h5')
 
-"""
-history_object = model.fit_generator(train_generator, steps_per_epoch= (len(train_samples)/32), validation_data=validation_generator, 
-            validation_steps=(len(validation_samples)/32), epochs=3, verbose=1)
-"""
+### Save the model weights
+model.save_weights('my_model_weights.h5')
 
 ### print the keys contained in the history object
 print(history_object.history.keys())
