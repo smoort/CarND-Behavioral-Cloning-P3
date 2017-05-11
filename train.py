@@ -6,17 +6,58 @@ import sklearn
 import os.path
 
 samples = []
-
+#linux
+#path = './data/'
+# windows
+#path = '.\data\\'
+path = './data/'
 ###  Load data
-with open('.\data\driving_log.csv') as csvfile:
+#with open('.\data1\driving_log.csv') as csvfile:
+with open(path + 'driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
     for line in reader:
-#        if line[3] != '0':
+        #if line[3] != '0':
+        img_path = line[0]
+        filename = img_path.split('\\')[-1]
+        #new_path = path + 'IMG\\' + filename
+        new_path = path + 'IMG/' + filename
+        line[0] = new_path
         samples.append(line)
+
+#path = '.\data1\\'
+path = './data1/'
+###  Load data
+#with open('.\data1\driving_log.csv') as csvfile:
+with open(path + 'driving_log.csv') as csvfile:
+    reader = csv.reader(csvfile)
+    for line in reader:
+        #if line[3] != '0':
+        img_path = line[0]
+        filename = img_path.split('\\')[-1]
+        #new_path = path + 'IMG\\' + filename
+        new_path = path + 'IMG/' + filename
+        line[0] = new_path
+        samples.append(line)
+sklearn.utils.shuffle(samples)
         
+#path = '.\data2\\'
+path = './data2/'
+###  Load data
+#with open('.\data1\driving_log.csv') as csvfile:
+with open(path + 'driving_log.csv') as csvfile:
+    reader = csv.reader(csvfile)
+    for line in reader:
+        #if line[3] != '0':
+        img_path = line[0]
+        filename = img_path.split('\\')[-1]
+        #new_path = path + 'IMG\\' + filename
+        new_path = path + 'IMG/' + filename
+        line[0] = new_path
+        samples.append(line)
+sklearn.utils.shuffle(samples)
+
 print('Number of records in input file = ', len(samples))
 print('File read complete')
-
 
 
 """
@@ -38,31 +79,13 @@ plt.axis([-1, 1, 0, 10000])
 plt.grid(True)
 plt.show()
 
-
-
-###  Augument Data
-
-augumented_images, augumented_measurements = [], []
-for sample in samples:
-    augumented_images.append(image)
-    augumented_measurements.append(measurement)
-    augumented_images.append(cv2.flip(image,1))
-    augumented_measurements.append(measurement * -1.0)
-
-AX_train = np.array(augumented_images)
-Ay_train = np.array(augumented_measurements)
-
-print('Number of records after augumentation = ', len(samples))
-print('Data augumentation complete')
-
-###  Preprocess Data
-
 """
 
 from sklearn.model_selection import train_test_split
 train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 print('Training data size after split = ', len(train_samples))
 print('Validation data size after split = ', len(validation_samples))
+
 
 images = []
 measurements = []
@@ -71,24 +94,46 @@ def generator(samples, batch_size=32):
     num_samples = len(samples)
     while 1: # Loop forever so the generator never terminates
         sklearn.utils.shuffle(samples)
-#        X_train = np.zeros(shape=(32,160,320,3))
-#        y_train = np.zeros(shape=(32,1))
         for offset in range(0, num_samples, batch_size):
             batch_samples = samples[offset:offset+batch_size]
 
             images = []
             measurements = []
             for batch_sample in batch_samples:
-                source_path = batch_sample[0]
-                filename = source_path.split('/')[-1]
-                current_path = '.\data\IMG\\' + filename
-                image = cv2.imread(current_path)
-                images.append(image)
-                measurement = float(batch_sample[3])
-                measurements.append(measurement)
+#                source_path = batch_sample[0]
+#                filename = source_path.split('\\')[-1]
+#                current_path = path + 'IMG\\' + filename
+#                current_path = path + 'IMG/' + filename
+
+                # create adjusted steering measurements for the side camera images
+                correction = 0.2
+                steering_center = float(batch_sample[3])
+                steering_left = steering_center + correction
+                steering_right = steering_center - correction
+
+                # read in images from center, left and right cameras
                 
-                images.append(cv2.flip(image,1))
-                measurements.append(measurement * -1.0)
+                image_center = cv2.imread(batch_sample[0])
+                image_left = cv2.imread(batch_sample[1])
+                image_right = cv2.imread(batch_sample[2])
+                
+ 
+               # add images and angles to data set 
+                images.append(image_center)
+                #images.append(image_left)
+                #images.append(image_right)
+
+                measurements.append(steering_center)
+                #measurements.append(steering_left)
+                #measurements.append(steering_right)
+                
+                # Augument data by flipping the image and adjusting steering angle accordingly
+                images.append(cv2.flip(image_center,1))
+                measurements.append(steering_center * -1.0)
+                #images.append(cv2.flip(image_left,1))
+                #measurements.append(steering_left * -1.0)
+                #images.append(cv2.flip(image_right,1))
+                #measurements.append(steering_right * -1.0)
 
             X_train = np.array(images)
             y_train = np.array(measurements)
@@ -149,6 +194,7 @@ model.add(Dense(1))
 
 ### Load weights if available
 if os.path.exists('my_model_weights.h5'):
+    print('loading weights from saved file')
     model.load_weights('my_model_weights.h5')
 
 model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
