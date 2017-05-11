@@ -17,16 +17,15 @@
 
 [//]: # (Image References)
 
-[image1]: ./examples/placeholder.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
+[image1]: ./examples/NormalImg.jpg "Normal Training"
+[image2]: ./examples/RecoveryImg.jpg "Recovery Image 1"
+[image3]: ./examples/RecoveryImg2.jpg "Recovery Image 2"
+[image4]: ./examples/ActualImg.jpg "Normal Image"
+[image5]: ./examples/FlippedImg.jpg "Flipped Image"
 
 
 ### *Model Architecture and Training Strategy*
+
 
 **1. Model Architecture** : A convolutional neural network based on Nvidia architecture has been used for this solution.
 
@@ -35,15 +34,18 @@
 * A Dropout has been implemented after the convolutional layers to reduce overfitting
 * Input image cropping and normalization are handled within the model
 
+
 **2. Attempts to reduce overfitting in the model**
 
 * The model contains a dropout layer in order to reduce overfitting. 
 * The model was trained and validated on different data sets to identify any overfitting situation.
 * The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track. This confirmed that the model was appropriately fit.
 
+
 **3. Model parameter tuning**
 
 * The model used an adam optimizer, so the learning rate was not tuned manually.
+
 
 **4. Appropriate training data** : Multiple recordings were done as listed below to successfully train the model.
 
@@ -53,7 +55,9 @@
 
 ---
 
+
 ### *Architecture and Training Documentation*
+
 
 **1. Solution Design Approach**
 
@@ -108,4 +112,16 @@ Below is the final architecture of the model
 * 3 epochs provided the best results for this exercise.
 * Adam optimizer was used and hence  manually training the learning rate wasn't necessary.
 
+Image from normal driving
+![alt text][image1]
+
+Images from recovery driving
+![alt text][image2]
+![alt text][image3]
+
+Image before flipping
+![alt text][image4]
+
+Image after flipping
+![alt text][image5]
 ---
