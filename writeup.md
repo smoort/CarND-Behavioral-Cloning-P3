@@ -114,18 +114,22 @@ Below is the final architecture of the model
 
 
 Image from normal driving
+
 ![alt text][image1]
 
 
 Images from recovery driving
+
 ![alt text][image2]
 ![alt text][image3]
 
 
 Image before flipping
+
 ![alt text][image4]
 
 
 Image after flipping
+
 ![alt text][image5]
 ---
