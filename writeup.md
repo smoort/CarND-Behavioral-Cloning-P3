@@ -73,36 +73,39 @@ The strategy used for deriving a model architecture is as listed below :
 
 **2. Final Model Architecture**
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
+Below is the final architecture of the model
 
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
-
-![alt text][image1]
-
-####3. Creation of the Training Set & Training Process
-
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
-
-![alt text][image2]
-
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
-
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
-
-Then I repeated this process on track two in order to get more data points.
-
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
-
-![alt text][image6]
-![alt text][image7]
-
-Etc ....
-
-After the collection process, I had X number of data points. I then preprocessed this data by ...
+| Layer         		|     Description	        					| 
+|:---------------------:|:---------------------------------------------:| 
+| Image Cropping2D 		| 160x320x3 --> 75x320x3						|
+| Normalization	Lambda  | (x / 255) - 0.5								|
+| Layer 1 - Conv 5x5  	| 2x2 stride, 24 filters, RELU activation	 	|
+| Layer 2 - Conv 5x5  	| 2x2 stride, 36 filters, RELU activation	 	|
+| Layer 3 - Conv 5x5  	| 1x1 stride, 48 filters, RELU activation	 	|
+| Layer 4 - Conv 3x3  	| 1x1 stride, 64 filters, RELU activation	 	|
+| Layer 5 - Conv 3x3  	| 1x1 stride, 64 filters, RELU activation	 	|
+| Dropout Layer    		| 0.25	 										|
+| Fully connected 0		| Flatten										|
+| Fully connected 1		| 1164											|
+| Fully connected 2		| 100											|
+| Fully connected 3		| 50											|
+| Fully connected 4		| 10											|
+| Output layer			| 1												|
 
 
-I finally randomly shuffled the data set and put Y% of the data into a validation set. 
+**3. Creation of the Training Set & Training Process**
 
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+
+* The model was trained iteratively using the results of the previous run to identify sections that had to be retrained
+* The first run was normal driving which was used for the initial training.  Steering angle of 0 was ignored from this dataset to avoid the model getting biased towards straight driving.
+* Zig zag driving was done to help the model to learn how to reach when the car drifts towards the edges of the road
+* Challenging spots were identified from each of the runs and more data was collected on those spots
+* Data was augumented by flipping existing images to provide more test data.
+* Preprocessing was built into the model - Normalization and cropping were the preprocessing steps applied
+* The weights were saved after every training so that they can be reused as the starting point for next training.  This increases the effeciency of the training.
+* Data was shuffled once read to avoid predictability
+* A validation dataset was extracted from the input data.  This data was used for validation to check if the model was over or under fitting.
+* 3 epochs provided the best results for this exercise.
+* Adam optimizer was used and hence  manually training the learning rate wasn't necessary.
+
+---
