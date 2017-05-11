@@ -112,15 +112,19 @@ Below is the final architecture of the model
 * 3 epochs provided the best results for this exercise.
 * Adam optimizer was used and hence  manually training the learning rate wasn't necessary.
 
+
 Image from normal driving
 ![alt text][image1]
+
 
 Images from recovery driving
 ![alt text][image2]
 ![alt text][image3]
 
+
 Image before flipping
 ![alt text][image4]
+
 
 Image after flipping
 ![alt text][image5]
