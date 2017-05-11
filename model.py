@@ -6,12 +6,10 @@ import sklearn
 import os.path
 
 samples = []
-#linux
-#path = './data/'
-# windows
-#path = '.\data\\'
+
+###  Load data from multiple folders that hold training images
+
 path = './data/'
-###  Load data
 #with open('.\data1\driving_log.csv') as csvfile:
 with open(path + 'driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
@@ -25,9 +23,7 @@ with open(path + 'driving_log.csv') as csvfile:
         if line[3] != '0':
             samples.append(line)
 
-#path = '.\data1\\'
 path = './data1/'
-###  Load data
 #with open('.\data1\driving_log.csv') as csvfile:
 with open(path + 'driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
@@ -41,9 +37,7 @@ with open(path + 'driving_log.csv') as csvfile:
         samples.append(line)
 sklearn.utils.shuffle(samples)
         
-#path = '.\data2\\'
 path = './data2/'
-###  Load data
 #with open('.\data1\driving_log.csv') as csvfile:
 with open(path + 'driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
@@ -59,28 +53,6 @@ sklearn.utils.shuffle(samples)
 
 print('Number of records in input file = ', len(samples))
 print('File read complete')
-
-
-"""
-###  Visualize Data
-
-steering_angles = []
-for sample in samples:
-    steering_angle = float(sample[3])
-    steering_angles.append(steering_angle)
-print(len(steering_angles))
-print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-print('VISUALIZING TRAINING CLASS DISTRIBUTION')
-print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-n, bins, patches = plt.hist(steering_angles, bins=21)
-plt.title("Streeing Anlge Histogram")
-plt.xlabel("Streering Angle")
-plt.ylabel("Frequency")
-plt.axis([-1, 1, 0, 10000])
-plt.grid(True)
-plt.show()
-
-"""
 
 from sklearn.model_selection import train_test_split
 train_samples, validation_samples = train_test_split(samples, test_size=0.2)
@@ -101,10 +73,6 @@ def generator(samples, batch_size=32):
             images = []
             measurements = []
             for batch_sample in batch_samples:
-#                source_path = batch_sample[0]
-#                filename = source_path.split('\\')[-1]
-#                current_path = path + 'IMG\\' + filename
-#                current_path = path + 'IMG/' + filename
 
                 # create adjusted steering measurements for the side camera images
                 correction = 0.2
@@ -155,28 +123,9 @@ from keras.layers import Dense, Activation, Flatten, Lambda, Dropout, Cropping2D
 from keras.layers.convolutional import Convolution2D, Conv2D
 from keras.layers.pooling import MaxPooling2D
 
-"""
-# Create a model
-model = Sequential()
-model.add(Cropping2D(cropping=((60,25), (0,0)), input_shape=(160,320,3)))
-#model.add(Lambda(lambda x: x/255.0 - 0.5, input_shape=(160,320,3)))
-model.add(Lambda(lambda x: x/255.0 - 0.5))
-#model.add(Convolution2D(32, 3, 3, input_shape=(32, 32, 3)))
-model.add(Conv2D(32, (5, 5), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(64, (5, 5), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
 
-model.add(Dropout(0.25))
-model.add(Flatten())
-model.add(Dense(128))
-model.add(Dense(120))
-model.add(Dense(84))
-model.add(Dense(1))
+# Create a model - Adopted the Nvidia model
 
-"""
-
-# Nvidia model
 model = Sequential()
 model.add(Cropping2D(cropping=((60,25), (0,0)), input_shape=(160,320,3)))
 model.add(Lambda(lambda x: x/255.0 - 0.5))
@@ -198,6 +147,7 @@ if os.path.exists('my_model_weights.h5'):
     print('loading weights from saved file')
     model.load_weights('my_model_weights.h5')
 
+### Model Execution
 model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
 history_object = model.fit_generator(train_generator, steps_per_epoch= (len(train_samples)/32), validation_data=validation_generator, 
             validation_steps=(len(validation_samples)/32), epochs=3, verbose=1)
